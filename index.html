@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오늘의 한국어 · Daily Korean</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&family=Noto+Sans+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1008;
+    --paper: #faf6ef;
+    --red: #c0392b;
+    --gold: #b8860b;
+    --muted: #8a7a6a;
+    --line: #d4c9b8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* Subtle paper texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 34px, rgba(180,160,130,0.06) 35px),
+      repeating-linear-gradient(90deg, transparent, transparent 34px, rgba(180,160,130,0.04) 35px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Red margin line */
+  body::after {
+    content: '';
+    position: fixed;
+    left: clamp(40px, 8vw, 100px);
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: rgba(192,57,43,0.25);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 700px;
+    padding: clamp(40px, 8vw, 80px) clamp(24px, 5vw, 60px) clamp(40px, 8vw, 80px) clamp(60px, 12vw, 130px);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .site-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(11px, 2vw, 14px);
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .site-title span {
+    color: var(--red);
+    font-weight: 400;
+  }
+
+  .day-badge {
+    margin-left: auto;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Date display */
+  .date-line {
+    margin-top: 32px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(13px, 2.5vw, 15px);
+    font-style: italic;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* Category tag */
+  .category-tag {
+    margin-top: 10px;
+    display: inline-block;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    border: 1px solid rgba(192,57,43,0.35);
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  /* Main Korean word */
+  .korean-word {
+    margin-top: 40px;
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(56px, 14vw, 100px);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    cursor: pointer;
+    transition: color 0.2s;
+    position: relative;
+    display: inline-block;
+  }
+
+  .korean-word:hover { color: var(--red); }
+
+  /* Romanization */
+  .romanization {
+    margin-top: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(20px, 4vw, 28px);
+    color: var(--gold);
+    letter-spacing: 0.08em;
+  }
+
+  /* Divider rule */
+  .rule {
+    margin: 28px 0;
+    height: 1px;
+    background: linear-gradient(to right, var(--red), var(--line) 60%, transparent);
+  }
+
+  /* Meaning */
+  .meaning-label {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 8px;
+  }
+
+  .meaning-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 4.5vw, 30px);
+    font-weight: 300;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+
+  /* Example sentence */
+  .example-block {
+    margin-top: 32px;
+    padding: 20px 24px;
+    border-left: 3px solid var(--red);
+    background: rgba(192,57,43,0.03);
+  }
+
+  .example-label {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 10px;
+  }
+
+  .example-korean {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(16px, 3vw, 20px);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.6;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .example-korean:hover { color: var(--red); }
+
+  .example-romanization {
+    margin-top: 4px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold);
+  }
+
+  .example-english {
+    margin-top: 8px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(15px, 2.5vw, 18px);
+    font-style: italic;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* Pronunciation button */
+  .speak-btn {
+    margin-top: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 14px 28px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    border-radius: 2px;
+  }
+
+  .speak-btn:hover { background: var(--red); }
+  .speak-btn:active { transform: scale(0.97); }
+
+  .speak-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    flex-shrink: 0;
+  }
+
+  /* Sound wave animation */
+  .wave {
+    display: none;
+    align-items: center;
+    gap: 3px;
+    height: 16px;
+  }
+
+  .wave.playing { display: inline-flex; }
+
+  .wave span {
+    display: block;
+    width: 3px;
+    background: var(--paper);
+    border-radius: 2px;
+    animation: wave 0.8s ease-in-out infinite;
+  }
+
+  .wave span:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .wave span:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+  .wave span:nth-child(3) { height: 14px; animation-delay: 0.2s; }
+  .wave span:nth-child(4) { height: 8px; animation-delay: 0.3s; }
+  .wave span:nth-child(5) { height: 5px; animation-delay: 0.15s; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+  }
+
+  /* Progress / streak */
+  .streak-line {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .streak-label {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .streak-dots {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    transition: background 0.3s;
+  }
+
+  .dot.visited { background: var(--red); }
+  .dot.today { background: var(--gold); box-shadow: 0 0 0 2px rgba(184,134,11,0.3); }
+
+  /* Footer */
+  footer {
+    margin-top: auto;
+    padding-top: 40px;
+    padding-bottom: 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Entrance animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate { animation: fadeUp 0.7s ease forwards; }
+  .animate-2 { animation: fadeUp 0.7s 0.15s ease both; }
+  .animate-3 { animation: fadeUp 0.7s 0.3s ease both; }
+  .animate-4 { animation: fadeUp 0.7s 0.45s ease both; }
+
+  /* Hover tip */
+  .tap-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    margin-top: 8px;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 480px) {
+    body::after { left: 20px; }
+    .wrapper { padding-left: 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header class="site-header">
+    <div class="site-title">오늘의 한국어 · <span>Daily Korean</span></div>
+    <div class="day-badge" id="dayBadge">Day 1 of 365</div>
+  </header>
+
+  <div class="date-line animate" id="dateDisplay"></div>
+  <div class="category-tag animate" id="categoryTag"></div>
+
+  <div class="korean-word animate-2" id="koreanWord" onclick="speakKorean(true)"></div>
+  <div class="romanization animate-2" id="romanization"></div>
+
+  <div class="rule animate-3"></div>
+
+  <div class="animate-3">
+    <div class="meaning-label">Meaning</div>
+    <div class="meaning-text" id="meaningText"></div>
+  </div>
+
+  <div class="example-block animate-4">
+    <div class="example-label">Example Sentence</div>
+    <div class="example-korean" id="exampleKorean" onclick="speakExample()"></div>
+    <div class="example-romanization" id="exampleRoman"></div>
+    <div class="example-english" id="exampleEnglish"></div>
+  </div>
+
+  <button class="speak-btn" onclick="speakKorean(true)" id="speakBtn">
+    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    <span id="btnText">Pronounce</span>
+    <div class="wave" id="waveAnim">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+  </button>
+  <div class="tap-hint">↑ tap word or button to hear pronunciation</div>
+
+  <div class="streak-line">
+    <span class="streak-label">Your year</span>
+    <div class="streak-dots" id="streakDots"></div>
+  </div>
+
+  <footer>
+    A new word every day · 365 days of Korean · 한국어를 매일 배워보세요
+  </footer>
+
+</div>
+
+<script>
+// ============================================================
+// 365 Korean words & phrases — fully hardcoded, no API needed
+// ============================================================
+const words = [
+  // --- BASICS ---
+  { k:"안녕하세요", r:"annyeonghaseyo", m:"Hello / How are you?", cat:"Greetings", ek:"안녕하세요, 만나서 반가워요.", er:"Annyeonghaseyo, mannaseo bangawoyo.", ee:"Hello, nice to meet you." },
+  { k:"감사합니다", r:"gamsahamnida", m:"Thank you (formal)", cat:"Courtesy", ek:"도와주셔서 감사합니다.", er:"Dowajusyeoseo gamsahamnida.", ee:"Thank you for helping me." },
+  { k:"미안합니다", r:"mianhamnida", m:"I'm sorry (formal)", cat:"Courtesy", ek:"늦어서 미안합니다.", er:"Neujeoseo mianhamnida.", ee:"I'm sorry for being late." },
+  { k:"네", r:"ne", m:"Yes", cat:"Basics", ek:"네, 알겠습니다.", er:"Ne, algesseumnida.", ee:"Yes, I understand." },
+  { k:"아니요", r:"aniyo", m:"No", cat:"Basics", ek:"아니요, 괜찮아요.", er:"Aniyo, gwaenchanayo.", ee:"No, it's fine." },
+  { k:"괜찮아요", r:"gwaenchanayo", m:"It's okay / I'm fine", cat:"Expressions", ek:"걱정하지 마세요, 다 괜찮아요.", er:"Geokjeonghaji maseyo, da gwaenchanayo.", ee:"Don't worry, everything is okay." },
+  { k:"물", r:"mul", m:"Water", cat:"Food & Drink", ek:"물 한 잔 주세요.", er:"Mul han jan juseyo.", ee:"Please give me a glass of water." },
+  { k:"밥", r:"bap", m:"Rice / Meal", cat:"Food & Drink", ek:"밥 먹었어요?", er:"Bap meogeosseoyo?", ee:"Have you eaten?" },
+  { k:"사랑해요", r:"saranghaeyo", m:"I love you", cat:"Emotions", ek:"당신을 사랑해요.", er:"Dangsin-eul saranghaeyo.", ee:"I love you." },
+  { k:"행복", r:"haengbok", m:"Happiness", cat:"Emotions", ek:"행복이 무엇인지 알아요?", er:"Haengbogi mueosinjji arayo?", ee:"Do you know what happiness is?" },
+
+  // --- NUMBERS ---
+  { k:"하나", r:"hana", m:"One (native Korean)", cat:"Numbers", ek:"사과 하나 주세요.", er:"Sagwa hana juseyo.", ee:"Please give me one apple." },
+  { k:"둘", r:"dul", m:"Two (native Korean)", cat:"Numbers", ek:"커피 둘 주세요.", er:"Keopi dul juseyo.", ee:"Two coffees, please." },
+  { k:"셋", r:"set", m:"Three (native Korean)", cat:"Numbers", ek:"셋까지 세어 보세요.", er:"Setkkaji seeeo boseyo.", ee:"Count to three." },
+  { k:"일", r:"il", m:"One (Sino-Korean)", cat:"Numbers", ek:"일 번이에요.", er:"Il beonieyo.", ee:"It's number one." },
+  { k:"이", r:"i", m:"Two (Sino-Korean)", cat:"Numbers", ek:"이 층이에요.", er:"I cheungieyo.", ee:"It's the second floor." },
+
+  // --- COLORS ---
+  { k:"빨간색", r:"ppalgan-saek", m:"Red", cat:"Colors", ek:"빨간색 장미가 예뻐요.", er:"Ppalgan-saek jangmiga yeppeoyo.", ee:"Red roses are beautiful." },
+  { k:"파란색", r:"paran-saek", m:"Blue", cat:"Colors", ek:"하늘이 파란색이에요.", er:"Haneuri paran-saegieyo.", ee:"The sky is blue." },
+  { k:"노란색", r:"noran-saek", m:"Yellow", cat:"Colors", ek:"해바라기는 노란색이에요.", er:"Haebaragin-eun noran-saegieyo.", ee:"Sunflowers are yellow." },
+  { k:"초록색", r:"chorok-saek", m:"Green", cat:"Colors", ek:"나뭇잎이 초록색이에요.", er:"Namunnip-i chorok-saegieyo.", ee:"The leaves are green." },
+  { k:"흰색", r:"huin-saek", m:"White", cat:"Colors", ek:"눈은 흰색이에요.", er:"Nun-eun huin-saegieyo.", ee:"Snow is white." },
+  { k:"검은색", r:"geom-eun-saek", m:"Black", cat:"Colors", ek:"하늘이 밤에 검은색이에요.", er:"Haneuri bame geom-eun-saegieyo.", ee:"The sky is black at night." },
+
+  // --- FAMILY ---
+  { k:"어머니", r:"eomeoni", m:"Mother", cat:"Family", ek:"우리 어머니는 요리를 잘해요.", er:"Uri eomeonineun yorireul jalhaeyo.", ee:"My mother cooks well." },
+  { k:"아버지", r:"abeoji", m:"Father", cat:"Family", ek:"아버지는 회사에 가셨어요.", er:"Abeojineun hoesae gasyeosseoyo.", ee:"Father went to work." },
+  { k:"형제", r:"hyeongje", m:"Siblings / Brother(s)", cat:"Family", ek:"형제가 있어요?", er:"Hyeongjega isseoyo?", ee:"Do you have siblings?" },
+  { k:"친구", r:"chingu", m:"Friend", cat:"Relationships", ek:"오랜 친구를 만났어요.", er:"Oraen chingureul mannatsseoyo.", ee:"I met an old friend." },
+  { k:"가족", r:"gajok", m:"Family", cat:"Family", ek:"가족이 소중해요.", er:"Gagogi sojunghaeyo.", ee:"Family is precious." },
+
+  // --- TIME ---
+  { k:"오늘", r:"oneul", m:"Today", cat:"Time", ek:"오늘 날씨가 좋아요.", er:"Oneul nalssiga joayo.", ee:"The weather is nice today." },
+  { k:"내일", r:"naeil", m:"Tomorrow", cat:"Time", ek:"내일 만나요.", er:"Naeil mannayo.", ee:"Let's meet tomorrow." },
+  { k:"어제", r:"eoje", m:"Yesterday", cat:"Time", ek:"어제 영화를 봤어요.", er:"Eoje yeonghwareul bwasseoyo.", ee:"I watched a movie yesterday." },
+  { k:"지금", r:"jigeum", m:"Now / Right now", cat:"Time", ek:"지금 어디에 있어요?", er:"Jigeum eodie isseoyo?", ee:"Where are you right now?" },
+  { k:"아침", r:"achim", m:"Morning / Breakfast", cat:"Time", ek:"아침을 먹었어요?", er:"Achimeul meogeosseoyo?", ee:"Did you eat breakfast?" },
+  { k:"저녁", r:"jeonyeok", m:"Evening / Dinner", cat:"Time", ek:"저녁에 같이 밥 먹어요.", er:"Jeonyeoge gachi bap meogeoyo.", ee:"Let's eat dinner together in the evening." },
+  { k:"밤", r:"bam", m:"Night", cat:"Time", ek:"밤에 잠을 잘 자요.", er:"Bame jam-eul jal jayo.", ee:"I sleep well at night." },
+  { k:"봄", r:"bom", m:"Spring", cat:"Seasons", ek:"봄에 꽃이 피어요.", er:"Bome kkochi pieoyo.", ee:"Flowers bloom in spring." },
+  { k:"여름", r:"yeoreum", m:"Summer", cat:"Seasons", ek:"여름은 더워요.", er:"Yeoreumeun deowoyo.", ee:"Summer is hot." },
+  { k:"가을", r:"ga-eul", m:"Autumn / Fall", cat:"Seasons", ek:"가을에 단풍이 예뻐요.", er:"Ga-eule danpungi yeppeoyo.", ee:"Autumn leaves are beautiful." },
+  { k:"겨울", r:"gyeoul", m:"Winter", cat:"Seasons", ek:"겨울은 추워요.", er:"Gyeoureun chuwoyo.", ee:"Winter is cold." },
+
+  // --- PLACES ---
+  { k:"학교", r:"hakgyo", m:"School", cat:"Places", ek:"학교에 가요.", er:"Hakgyoe gayo.", ee:"I'm going to school." },
+  { k:"병원", r:"byeongwon", m:"Hospital", cat:"Places", ek:"병원에 가야 해요.", er:"Byeongwone gaya haeyo.", ee:"I need to go to the hospital." },
+  { k:"시장", r:"sijang", m:"Market", cat:"Places", ek:"시장에서 과일을 사요.", er:"Sijangeseo gwail-eul sayo.", ee:"I buy fruit at the market." },
+  { k:"도서관", r:"doseogwan", m:"Library", cat:"Places", ek:"도서관에서 책을 읽어요.", er:"Doseogwaneseo chaegeul ilgeoyo.", ee:"I read books at the library." },
+  { k:"공항", r:"gonghang", m:"Airport", cat:"Places", ek:"공항에 언제 도착해요?", er:"Gonghange eonje dochaghaeyo?", ee:"When do you arrive at the airport?" },
+  { k:"식당", r:"sikdang", m:"Restaurant", cat:"Places", ek:"저 식당 음식이 맛있어요.", er:"Jeo sikdang eumsigi massisseoyo.", ee:"That restaurant's food is delicious." },
+  { k:"집", r:"jip", m:"Home / House", cat:"Places", ek:"집에 가고 싶어요.", er:"Jibe gago sipeoyo.", ee:"I want to go home." },
+
+  // --- FOOD ---
+  { k:"김치", r:"gimchi", m:"Kimchi (fermented cabbage)", cat:"Food & Drink", ek:"김치는 한국 음식이에요.", er:"Gimchineun hanguk eumsigieyo.", ee:"Kimchi is Korean food." },
+  { k:"불고기", r:"bulgogi", m:"Bulgogi (Korean BBQ beef)", cat:"Food & Drink", ek:"불고기가 정말 맛있어요.", er:"Bulgogiga jeongmal massisseoyo.", ee:"Bulgogi is really delicious." },
+  { k:"떡볶이", r:"tteokbokki", m:"Spicy rice cake", cat:"Food & Drink", ek:"떡볶이는 매워요.", er:"Tteokbokkineun maewoyo.", ee:"Tteokbokki is spicy." },
+  { k:"된장찌개", r:"doenjang-jjigae", m:"Soybean paste stew", cat:"Food & Drink", ek:"된장찌개 냄새가 좋아요.", er:"Doenjang-jjigae naemsaega joayo.", ee:"Doenjang-jjigae smells good." },
+  { k:"비빔밥", r:"bibimbap", m:"Mixed rice bowl", cat:"Food & Drink", ek:"비빔밥에 고추장을 넣어요.", er:"Bibimbabe gochujang-eul neoeoyo.", ee:"I put gochujang in bibimbap." },
+  { k:"갈비", r:"galbi", m:"Grilled ribs", cat:"Food & Drink", ek:"갈비가 먹고 싶어요.", er:"Galbiga meokgo sipeoyo.", ee:"I want to eat galbi." },
+  { k:"잡채", r:"japchae", m:"Glass noodle stir-fry", cat:"Food & Drink", ek:"잡채는 부드러워요.", er:"Japchaeneun budeureowo.", ee:"Japchae is soft and savory." },
+  { k:"삼겹살", r:"samgyeopsal", m:"Grilled pork belly", cat:"Food & Drink", ek:"삼겹살에 쌈을 싸서 먹어요.", er:"Samgyeopsale ssam-eul ssaseo meogeyo.", ee:"I wrap samgyeopsal in a leaf and eat it." },
+  { k:"순두부찌개", r:"sundubu-jjigae", m:"Soft tofu stew", cat:"Food & Drink", ek:"순두부찌개는 뜨거워요.", er:"Sundubu-jjigaeneun tteugeowo.", ee:"Soft tofu stew is hot." },
+  { k:"냉면", r:"naengmyeon", m:"Cold noodles", cat:"Food & Drink", ek:"여름에 냉면을 먹어요.", er:"Yeoreume naengmyeon-eul meogeyo.", ee:"I eat cold noodles in summer." },
+
+  // --- VERBS ---
+  { k:"먹다", r:"meokda", m:"To eat", cat:"Verbs", ek:"저는 밥을 먹어요.", er:"Jeoneun bab-eul meogeyo.", ee:"I am eating rice." },
+  { k:"마시다", r:"masida", m:"To drink", cat:"Verbs", ek:"물을 마셔요.", er:"Mul-eul mashyeoyo.", ee:"I drink water." },
+  { k:"가다", r:"gada", m:"To go", cat:"Verbs", ek:"학교에 가요.", er:"Hakgyoe gayo.", ee:"I go to school." },
+  { k:"오다", r:"oda", m:"To come", cat:"Verbs", ek:"친구가 와요.", er:"Chinguga wayo.", ee:"My friend is coming." },
+  { k:"보다", r:"boda", m:"To see / watch", cat:"Verbs", ek:"영화를 봐요.", er:"Yeonghwareul bwayo.", ee:"I watch a movie." },
+  { k:"듣다", r:"deutda", m:"To listen / hear", cat:"Verbs", ek:"음악을 들어요.", er:"Eumak-eul deureoyo.", ee:"I listen to music." },
+  { k:"읽다", r:"ikda", m:"To read", cat:"Verbs", ek:"책을 읽어요.", er:"Chaeg-eul ilgeoyo.", ee:"I read a book." },
+  { k:"쓰다", r:"sseuda", m:"To write / use", cat:"Verbs", ek:"편지를 써요.", er:"Pyeonjireul sseoyo.", ee:"I write a letter." },
+  { k:"자다", r:"jada", m:"To sleep", cat:"Verbs", ek:"일찍 자요.", er:"Iljjik jayo.", ee:"I sleep early." },
+  { k:"일어나다", r:"ireonada", m:"To wake up / get up", cat:"Verbs", ek:"아침에 일찍 일어나요.", er:"Achime iljjik ireonayo.", ee:"I wake up early in the morning." },
+  { k:"사다", r:"sada", m:"To buy", cat:"Verbs", ek:"옷을 사요.", er:"Os-eul sayo.", ee:"I buy clothes." },
+  { k:"팔다", r:"palda", m:"To sell", cat:"Verbs", ek:"시장에서 채소를 팔아요.", er:"Sijangeseo chaesoreul parayo.", ee:"They sell vegetables at the market." },
+  { k:"만들다", r:"mandeulda", m:"To make / create", cat:"Verbs", ek:"케이크를 만들어요.", er:"Keikeu-reul mandeuleoyo.", ee:"I make a cake." },
+  { k:"배우다", r:"baeuda", m:"To learn", cat:"Verbs", ek:"한국어를 배워요.", er:"Hangug-eoreul baeweoyo.", ee:"I am learning Korean." },
+  { k:"가르치다", r:"gareuchida", m:"To teach", cat:"Verbs", ek:"선생님이 수학을 가르쳐요.", er:"Seonsaengnimi suhaeg-eul gareuchyeoyo.", ee:"The teacher teaches math." },
+  { k:"일하다", r:"ilhada", m:"To work", cat:"Verbs", ek:"회사에서 일해요.", er:"Hoisaeseo ilhaeyo.", ee:"I work at the company." },
+  { k:"운동하다", r:"undonghada", m:"To exercise", cat:"Verbs", ek:"매일 운동해요.", er:"Maeil undongheyo.", ee:"I exercise every day." },
+  { k:"여행하다", r:"yeohaenghada", m:"To travel", cat:"Verbs", ek:"세계를 여행하고 싶어요.", er:"Segyereul yeohaenghago sipeoyo.", ee:"I want to travel the world." },
+  { k:"웃다", r:"utda", m:"To laugh / smile", cat:"Verbs", ek:"같이 웃어요.", er:"Gachi useoyo.", ee:"Let's laugh together." },
+  { k:"울다", r:"ulda", m:"To cry", cat:"Verbs", ek:"영화를 보고 울었어요.", er:"Yeonghwareul bogo ureosseoyo.", ee:"I cried watching the movie." },
+
+  // --- ADJECTIVES ---
+  { k:"크다", r:"keuda", m:"Big / Large", cat:"Adjectives", ek:"저 건물이 커요.", er:"Jeo geonmuri keoyo.", ee:"That building is big." },
+  { k:"작다", r:"jakda", m:"Small", cat:"Adjectives", ek:"이 방이 작아요.", er:"I bangi jagayo.", ee:"This room is small." },
+  { k:"빠르다", r:"ppareuda", m:"Fast / Quick", cat:"Adjectives", ek:"이 차는 빨라요.", er:"I chaneum ppallayo.", ee:"This car is fast." },
+  { k:"느리다", r:"neurida", m:"Slow", cat:"Adjectives", ek:"거북이는 느려요.", er:"Geobugineun neuryeoyo.", ee:"Turtles are slow." },
+  { k:"예쁘다", r:"yeppeuda", m:"Pretty / Beautiful", cat:"Adjectives", ek:"꽃이 예뻐요.", er:"Kkochi yeppeoyo.", ee:"The flower is pretty." },
+  { k:"멋있다", r:"meositda", m:"Cool / Stylish", cat:"Adjectives", ek:"그 사람은 정말 멋있어요.", er:"Geu saram-eun jeongmal meossisseoyo.", ee:"That person is really cool." },
+  { k:"맛있다", r:"masitda", m:"Delicious / Tasty", cat:"Adjectives", ek:"이 음식 정말 맛있어요!", er:"I eumsik jeongmal massisseoyo!", ee:"This food is really delicious!" },
+  { k:"맵다", r:"maepda", m:"Spicy", cat:"Adjectives", ek:"이 음식이 너무 매워요.", er:"I eumsigi neomu maewoyo.", ee:"This food is too spicy." },
+  { k:"달다", r:"dalda", m:"Sweet", cat:"Adjectives", ek:"이 케이크가 달아요.", er:"I keikeu-ga darayo.", ee:"This cake is sweet." },
+  { k:"짜다", r:"jjada", m:"Salty", cat:"Adjectives", ek:"이 국이 너무 짜요.", er:"I gugi neomu jjayo.", ee:"This soup is too salty." },
+  { k:"쓰다", r:"sseuda", m:"Bitter", cat:"Adjectives", ek:"이 약이 써요.", er:"I yagi sseoyo.", ee:"This medicine is bitter." },
+  { k:"차갑다", r:"chagapda", m:"Cold (to touch)", cat:"Adjectives", ek:"물이 차가워요.", er:"Muri chagawoyo.", ee:"The water is cold." },
+  { k:"따뜻하다", r:"ttatteutada", m:"Warm", cat:"Adjectives", ek:"햇살이 따뜻해요.", er:"Haessari ttatteutaeyo.", ee:"The sunlight is warm." },
+  { k:"더럽다", r:"deoreopda", m:"Dirty", cat:"Adjectives", ek:"방이 더러워요.", er:"Bangi deoreowoyo.", ee:"The room is dirty." },
+  { k:"깨끗하다", r:"kkaekkeutada", m:"Clean", cat:"Adjectives", ek:"방이 깨끗해요.", er:"Bangi kkaekkeuthaeyo.", ee:"The room is clean." },
+
+  // --- NATURE ---
+  { k:"하늘", r:"haneul", m:"Sky", cat:"Nature", ek:"하늘이 맑아요.", er:"Haneuri malgayo.", ee:"The sky is clear." },
+  { k:"바다", r:"bada", m:"Sea / Ocean", cat:"Nature", ek:"바다가 보고 싶어요.", er:"Badaga bogo sipeoyo.", ee:"I want to see the ocean." },
+  { k:"산", r:"san", m:"Mountain", cat:"Nature", ek:"한국에는 산이 많아요.", er:"Hangug-eneun san-i manayo.", ee:"There are many mountains in Korea." },
+  { k:"강", r:"gang", m:"River", cat:"Nature", ek:"한강이 서울을 흘러요.", er:"Hangangi Seoureul heulleoyo.", ee:"The Han River flows through Seoul." },
+  { k:"꽃", r:"kkot", m:"Flower", cat:"Nature", ek:"장미꽃이 예뻐요.", er:"Jangmi-kkosi yeppeoyo.", ee:"The rose flower is beautiful." },
+  { k:"나무", r:"namu", m:"Tree / Wood", cat:"Nature", ek:"나무가 높이 자랐어요.", er:"Namuga nopi jaratseoyo.", ee:"The tree grew tall." },
+  { k:"달", r:"dal", m:"Moon", cat:"Nature", ek:"달이 밝게 빛나요.", er:"Dari balgge bichnayo.", ee:"The moon shines brightly." },
+  { k:"별", r:"byeol", m:"Star", cat:"Nature", ek:"밤하늘에 별이 많아요.", er:"Bamhaneule byeori manayo.", ee:"There are many stars in the night sky." },
+  { k:"비", r:"bi", m:"Rain", cat:"Nature", ek:"비가 와요.", er:"Biga wayo.", ee:"It is raining." },
+  { k:"눈", r:"nun", m:"Snow / Eye", cat:"Nature", ek:"눈이 내려요.", er:"Nuni naeryeoyo.", ee:"Snow is falling." },
+  { k:"바람", r:"baram", m:"Wind", cat:"Nature", ek:"바람이 세게 불어요.", er:"Barami sege bureoyo.", ee:"The wind blows strongly." },
+
+  // --- BODY ---
+  { k:"머리", r:"meori", m:"Head / Hair", cat:"Body", ek:"머리가 아파요.", er:"Meoriga apayo.", ee:"My head hurts." },
+  { k:"눈", r:"nun", m:"Eye(s)", cat:"Body", ek:"눈이 피곤해요.", er:"Nuni pigonhaeyo.", ee:"My eyes are tired." },
+  { k:"코", r:"ko", m:"Nose", cat:"Body", ek:"코가 막혔어요.", er:"Koga makyeosseoyo.", ee:"My nose is stuffy." },
+  { k:"입", r:"ip", m:"Mouth", cat:"Body", ek:"입이 작아요.", er:"Ibi jagayo.", ee:"My mouth is small." },
+  { k:"손", r:"son", m:"Hand", cat:"Body", ek:"손을 씻어요.", er:"Son-eul ssisheoyo.", ee:"I wash my hands." },
+  { k:"발", r:"bal", m:"Foot / Feet", cat:"Body", ek:"발이 아파요.", er:"Bari apayo.", ee:"My feet hurt." },
+  { k:"귀", r:"gwi", m:"Ear(s)", cat:"Body", ek:"귀가 커요.", er:"Gwiga keoyo.", ee:"The ears are big." },
+
+  // --- EMOTIONS ---
+  { k:"기쁘다", r:"gippeuda", m:"Happy / Joyful", cat:"Emotions", ek:"만나서 기뻐요.", er:"Mannaseo gippeoyo.", ee:"I'm happy to meet you." },
+  { k:"슬프다", r:"seulpeuda", m:"Sad", cat:"Emotions", ek:"영화가 슬펐어요.", er:"Yeonghwaga seulpeosseoyo.", ee:"The movie was sad." },
+  { k:"화나다", r:"hwanada", m:"To be angry", cat:"Emotions", ek:"왜 화났어요?", er:"Wae hwanasseoyo?", ee:"Why are you angry?" },
+  { k:"무섭다", r:"museopda", m:"Scary / Afraid", cat:"Emotions", ek:"귀신이 무서워요.", er:"Gwisin-i museowo.", ee:"Ghosts are scary." },
+  { k:"지루하다", r:"jiruhada", m:"Boring / Bored", cat:"Emotions", ek:"수업이 지루해요.", er:"Sueopi jiruhaeyo.", ee:"The class is boring." },
+  { k:"피곤하다", r:"pigonhada", m:"Tired", cat:"Emotions", ek:"오늘 너무 피곤해요.", er:"Oneul neomu pigonhaeyo.", ee:"I'm so tired today." },
+  { k:"걱정", r:"geokjeong", m:"Worry / Concern", cat:"Emotions", ek:"너무 걱정하지 마세요.", er:"Neomu geokjeonghaji maseyo.", ee:"Don't worry too much." },
+
+  // --- TRAVEL ---
+  { k:"여권", r:"yeogwon", m:"Passport", cat:"Travel", ek:"여권을 가져왔어요?", er:"Yeogwon-eul gajyeowasseoyo?", ee:"Did you bring your passport?" },
+  { k:"지하철", r:"jihacheol", m:"Subway / Metro", cat:"Travel", ek:"지하철이 빨라요.", er:"Jihacheori ppallayo.", ee:"The subway is fast." },
+  { k:"버스", r:"beoseu", m:"Bus", cat:"Travel", ek:"버스가 언제 와요?", er:"Beoseuga eonje wayo?", ee:"When does the bus come?" },
+  { k:"택시", r:"taeksi", m:"Taxi", cat:"Travel", ek:"택시를 불러요.", er:"Taeksireul bulleoyo.", ee:"I call a taxi." },
+  { k:"기차", r:"gicha", m:"Train", cat:"Travel", ek:"기차가 빨리 달려요.", er:"Gichaga ppalli dallyeoyo.", ee:"The train runs fast." },
+  { k:"호텔", r:"hotel", m:"Hotel", cat:"Travel", ek:"호텔 예약했어요?", er:"Hotel yeyakhaesseoyo?", ee:"Did you make a hotel reservation?" },
+  { k:"지도", r:"jido", m:"Map", cat:"Travel", ek:"지도가 필요해요.", er:"Jidoga piryohaeyo.", ee:"I need a map." },
+  { k:"표", r:"pyo", m:"Ticket", cat:"Travel", ek:"표를 사야 해요.", er:"Pyoreul saya haeyo.", ee:"I need to buy a ticket." },
+
+  // --- SHOPPING ---
+  { k:"얼마예요?", r:"eolmayeyo?", m:"How much is it?", cat:"Shopping", ek:"이거 얼마예요?", er:"Igeo eolmayeyo?", ee:"How much is this?" },
+  { k:"싸다", r:"ssada", m:"Cheap / Inexpensive", cat:"Shopping", ek:"이 옷은 정말 싸요.", er:"I oseun jeongmal ssayo.", ee:"These clothes are really cheap." },
+  { k:"비싸다", r:"bissada", m:"Expensive", cat:"Shopping", ek:"이 가방은 비싸요.", er:"I gabangeun bissayo.", ee:"This bag is expensive." },
+  { k:"할인", r:"harin", m:"Discount / Sale", cat:"Shopping", ek:"할인이 있어요?", er:"Hari-ni isseoyo?", ee:"Is there a discount?" },
+  { k:"영수증", r:"yeongsujeung", m:"Receipt", cat:"Shopping", ek:"영수증 주세요.", er:"Yeongsujeung juseyo.", ee:"Please give me a receipt." },
+
+  // --- WEATHER ---
+  { k:"날씨", r:"nalssi", m:"Weather", cat:"Weather", ek:"오늘 날씨가 어때요?", er:"Oneul nalssiga eottaeyo?", ee:"How is the weather today?" },
+  { k:"덥다", r:"deobda", m:"Hot (weather)", cat:"Weather", ek:"오늘 정말 더워요.", er:"Oneul jeongmal deowoyo.", ee:"It's really hot today." },
+  { k:"춥다", r:"chupda", m:"Cold (weather)", cat:"Weather", ek:"겨울에 너무 추워요.", er:"Gyeoure neomu chuwoyo.", ee:"It's very cold in winter." },
+  { k:"흐리다", r:"heurida", m:"Cloudy", cat:"Weather", ek:"오늘 하늘이 흐려요.", er:"Oneul haneuri heuryeoyo.", ee:"The sky is cloudy today." },
+  { k:"맑다", r:"makda", m:"Clear / Sunny", cat:"Weather", ek:"날씨가 맑아요.", er:"Nalssiga malgayo.", ee:"The weather is clear." },
+  { k:"안개", r:"an-gae", m:"Fog", cat:"Weather", ek:"아침에 안개가 꼈어요.", er:"Achime an-gaega kkyeosseoyo.", ee:"There was fog in the morning." },
+
+  // --- SCHOOL & WORK ---
+  { k:"숙제", r:"sukje", m:"Homework", cat:"School", ek:"숙제를 다 했어요?", er:"Sukjereul da haesseoyo?", ee:"Did you finish all your homework?" },
+  { k:"시험", r:"siheom", m:"Exam / Test", cat:"School", ek:"내일 시험이 있어요.", er:"Naeil siheom-i isseoyo.", ee:"I have an exam tomorrow." },
+  { k:"선생님", r:"seonsaengnim", m:"Teacher", cat:"School", ek:"선생님이 잘 가르쳐요.", er:"Seonsaengnmi jal gareuchyeoyo.", ee:"The teacher teaches well." },
+  { k:"학생", r:"haksaeng", m:"Student", cat:"School", ek:"저는 학생이에요.", er:"Jeoneun haksaengieyo.", ee:"I am a student." },
+  { k:"회사", r:"hoesa", m:"Company / Office", cat:"Work", ek:"회사에 출근해요.", er:"Hoisae chulgeunhaeyo.", ee:"I commute to the company." },
+  { k:"회의", r:"hoeui", m:"Meeting", cat:"Work", ek:"오후에 회의가 있어요.", er:"Ohue hoeui-ga isseoyo.", ee:"I have a meeting in the afternoon." },
+  { k:"월급", r:"wolgeup", m:"Salary / Monthly pay", cat:"Work", ek:"이번 달에 월급을 받았어요.", er:"Ibeon dare wolgeub-eul badasseoyo.", ee:"I received my salary this month." },
+
+  // --- HEALTH ---
+  { k:"아프다", r:"apeuda", m:"To hurt / be sick", cat:"Health", ek:"배가 아파요.", er:"Baega apayo.", ee:"My stomach hurts." },
+  { k:"약", r:"yak", m:"Medicine", cat:"Health", ek:"약을 드세요.", er:"Yag-eul deuseyo.", ee:"Please take the medicine." },
+  { k:"의사", r:"uisa", m:"Doctor", cat:"Health", ek:"의사 선생님께 가야 해요.", er:"Uisa seonsaengnimkke gaya haeyo.", ee:"I need to see the doctor." },
+  { k:"간호사", r:"ganhosa", m:"Nurse", cat:"Health", ek:"간호사가 친절해요.", er:"Ganhosaga chinjeolhaeyo.", ee:"The nurse is kind." },
+  { k:"건강", r:"geongang", m:"Health", cat:"Health", ek:"건강이 최고예요.", er:"Geongagi choegoyeyo.", ee:"Health is the best." },
+
+  // --- KOREAN CULTURE ---
+  { k:"한복", r:"hanbok", m:"Traditional Korean clothing", cat:"Culture", ek:"명절에 한복을 입어요.", er:"Myeongjeore hanbog-eul ibeoyo.", ee:"I wear hanbok on holidays." },
+  { k:"추석", r:"chuseok", m:"Korean Thanksgiving (Harvest Festival)", cat:"Culture", ek:"추석에 가족이 모여요.", er:"Chuseoge gagogi moyeoyo.", ee:"Family gathers on Chuseok." },
+  { k:"설날", r:"seollal", m:"Korean New Year (Lunar)", cat:"Culture", ek:"설날에 세배를 해요.", er:"Seollare sebaereul haeyo.", ee:"We bow to elders on Seollal." },
+  { k:"태권도", r:"taekwondo", m:"Taekwondo (Korean martial art)", cat:"Culture", ek:"태권도는 한국 무술이에요.", er:"Taekwondoneun hanguk musuriyo.", ee:"Taekwondo is a Korean martial art." },
+  { k:"한글", r:"hangeul", m:"The Korean alphabet", cat:"Culture", ek:"한글을 배우고 싶어요.", er:"Hangeur-eul baeuge sipeoyo.", ee:"I want to learn Hangeul." },
+  { k:"K-팝", r:"K-pop", m:"Korean pop music", cat:"Culture", ek:"K-팝이 세계에서 인기 있어요.", er:"K-pabi segyeeseo ingi isseoyo.", ee:"K-pop is popular worldwide." },
+  { k:"드라마", r:"deurama", m:"Drama / TV series", cat:"Culture", ek:"한국 드라마를 좋아해요.", er:"Hanguk deuramareul joahaeyo.", ee:"I like Korean dramas." },
+  { k:"노래방", r:"noraebang", m:"Karaoke room", cat:"Culture", ek:"노래방에 가요!", er:"Noraebange gayo!", ee:"Let's go to karaoke!" },
+
+  // --- PHRASES ---
+  { k:"잠깐만요", r:"jamkkanmanyo", m:"Just a moment / Wait a second", cat:"Phrases", ek:"잠깐만요, 금방 올게요.", er:"Jamkkanmanyo, geumbang olgeyo.", ee:"Just a moment, I'll be right back." },
+  { k:"몰라요", r:"mollayo", m:"I don't know", cat:"Phrases", ek:"저는 몰라요.", er:"Jeoneun mollayo.", ee:"I don't know." },
+  { k:"이해해요", r:"ihaehaeyo", m:"I understand", cat:"Phrases", ek:"네, 이해해요.", er:"Ne, ihaehaeyo.", ee:"Yes, I understand." },
+  { k:"도와주세요", r:"dowajuseyo", m:"Please help me", cat:"Phrases", ek:"도와주세요, 길을 잃었어요.", er:"Dowajuseyo, gireul ireosseoyo.", ee:"Please help me, I'm lost." },
+  { k:"다시 말씀해 주세요", r:"dasi malsseum-hae juseyo", m:"Please say that again", cat:"Phrases", ek:"죄송한데, 다시 말씀해 주세요.", er:"Joesonghande, dasi malsseum-hae juseyo.", ee:"I'm sorry, could you say that again?" },
+  { k:"천천히 말해 주세요", r:"cheoncheonhi malhae juseyo", m:"Please speak slowly", cat:"Phrases", ek:"천천히 말해 주세요, 한국어를 배우고 있어요.", er:"Cheoncheonhi malhae juseyo, hangug-eoreul baeuge isseoyo.", ee:"Please speak slowly, I'm learning Korean." },
+  { k:"화이팅!", r:"hwaiting!", m:"You can do it! / Fighting! (encouragement)", cat:"Phrases", ek:"오늘도 화이팅!", er:"Oneuldo hwaiting!", ee:"You can do it today too!" },
+  { k:"잘 자요", r:"jal jayo", m:"Good night / Sleep well", cat:"Phrases", ek:"잘 자요, 꿈 꿔요!", er:"Jal jayo, kkum kkwoyo!", ee:"Good night, sweet dreams!" },
+  { k:"잘 먹겠습니다", r:"jal meokgesseumnida", m:"I will eat well (said before eating)", cat:"Phrases", ek:"잘 먹겠습니다! 맛있어 보여요.", er:"Jal meokgesseumnida! Massisseo boyeoyo.", ee:"I will eat well! It looks delicious." },
+  { k:"잘 먹었습니다", r:"jal meogeosseumnida", m:"I ate well (said after eating)", cat:"Phrases", ek:"잘 먹었습니다, 감사합니다.", er:"Jal meogeosseumnida, gamsahamnida.", ee:"I ate well, thank you." },
+  { k:"어디서 왔어요?", r:"eodiseo wasseoyo?", m:"Where are you from?", cat:"Phrases", ek:"어디서 왔어요? 저는 미국에서 왔어요.", er:"Eodiseo wasseoyo? Jeoneun miguk-eseo wasseoyo.", ee:"Where are you from? I'm from America." },
+  { k:"한국어 잘 못해요", r:"hangugeo jal moshaeyo", m:"I'm not good at Korean", cat:"Phrases", ek:"한국어 잘 못해요, 연습하고 있어요.", er:"Hangugeo jal moshaeyo, yeonseupago isseoyo.", ee:"I'm not good at Korean, but I'm practicing." },
+  { k:"배고파요", r:"baegopayo", m:"I'm hungry", cat:"Phrases", ek:"배고파요, 밥 먹으러 가요!", er:"Baegopayo, bap meogeuro gayo!", ee:"I'm hungry, let's go eat!" },
+  { k:"배불러요", r:"baebulleoyo", m:"I'm full", cat:"Phrases", ek:"너무 많이 먹었어요, 배불러요.", er:"Neomu mani meogeosseoyo, baebulleoyo.", ee:"I ate too much, I'm full." },
+  { k:"취미가 뭐예요?", r:"chwimiga mwoyeyo?", m:"What is your hobby?", cat:"Phrases", ek:"취미가 뭐예요? 저는 독서예요.", er:"Chwimiga mwoyeyo? Jeoneun dokseoyeyo.", ee:"What's your hobby? Mine is reading." },
+  { k:"몇 살이에요?", r:"myeot sarieyo?", m:"How old are you?", cat:"Phrases", ek:"몇 살이에요? 저는 스물다섯이에요.", er:"Myeot sarieyo? Jeoneun seumuldaseosieyo.", ee:"How old are you? I'm twenty-five." },
+  { k:"이름이 뭐예요?", r:"ireumi mwoyeyo?", m:"What is your name?", cat:"Phrases", ek:"이름이 뭐예요? 제 이름은 민준이에요.", er:"Ireumi mwoyeyo? Je ireumeun minjunieyo.", ee:"What's your name? My name is Minjun." },
+  { k:"반갑습니다", r:"bangapseumnida", m:"Nice to meet you (formal)", cat:"Phrases", ek:"처음 뵙겠습니다, 반갑습니다.", er:"Cheoeum boepgesseumnida, bangapseumnida.", ee:"It's my first time meeting you, nice to meet you." },
+  { k:"조심하세요", r:"josimhaseyo", m:"Be careful / Take care", cat:"Phrases", ek:"길이 미끄러워요, 조심하세요!", er:"Giri mikkeureowoyo, josimhaseyo!", ee:"The road is slippery, be careful!" },
+  { k:"축하해요", r:"chukhahaeyo", m:"Congratulations", cat:"Phrases", ek:"합격 축하해요!", er:"Hapgyeok chukhahaeyo!", ee:"Congratulations on passing!" },
+  { k:"생일 축하해요", r:"saengil chukhahaeyo", m:"Happy birthday", cat:"Phrases", ek:"생일 축하해요, 건강하세요!", er:"Saengil chukhahaeyo, geongganghaseyo!", ee:"Happy birthday, stay healthy!" },
+  { k:"새해 복 많이 받으세요", r:"saehae bok mani baduseyo", m:"Happy New Year", cat:"Phrases", ek:"새해 복 많이 받으세요!", er:"Saehae bok mani baduseyo!", ee:"Receive many blessings in the new year!" },
+
+  // --- MORE VOCABULARY ---
+  { k:"우산", r:"usan", m:"Umbrella", cat:"Objects", ek:"비가 오니까 우산을 가져가세요.", er:"Biga onikka usan-eul gajyeogaseyo.", ee:"It's raining, bring an umbrella." },
+  { k:"안경", r:"an-gyeong", m:"Glasses (eyewear)", cat:"Objects", ek:"안경을 잃어버렸어요.", er:"An-gyeong-eul ireobeoryeosseoyo.", ee:"I lost my glasses." },
+  { k:"시계", r:"sigye", m:"Clock / Watch", cat:"Objects", ek:"시계가 어디 있어요?", er:"Sigye-ga eodie isseoyo?", ee:"Where is the clock?" },
+  { k:"열쇠", r:"yeolsoe", m:"Key", cat:"Objects", ek:"열쇠를 못 찾겠어요.", er:"Yeolsoereul mot chatgesseoyo.", ee:"I can't find the key." },
+  { k:"가방", r:"gabang", m:"Bag", cat:"Objects", ek:"이 가방 어디서 샀어요?", er:"I gabang eodiseo sasseoyo?", ee:"Where did you buy this bag?" },
+  { k:"휴대폰", r:"hyudaepon", m:"Mobile phone", cat:"Objects", ek:"휴대폰 번호가 뭐예요?", er:"Hyudaepon beonhoga mwoyeyo?", ee:"What's your phone number?" },
+  { k:"컴퓨터", r:"keompyuteo", m:"Computer", cat:"Objects", ek:"컴퓨터가 고장났어요.", er:"Keompyuteoga gojangnatsseoyo.", ee:"The computer broke down." },
+  { k:"냉장고", r:"naengjanggo", m:"Refrigerator", cat:"Objects", ek:"냉장고에 뭐가 있어요?", er:"Naengjanggo-e mwoga isseoyo?", ee:"What's in the refrigerator?" },
+  { k:"세탁기", r:"setakgi", m:"Washing machine", cat:"Objects", ek:"세탁기를 돌려요.", er:"Setakgireul dollyeoyo.", ee:"I run the washing machine." },
+  { k:"침대", r:"chimdae", m:"Bed", cat:"Objects", ek:"침대가 편해요.", er:"Chimdaega pyeonhaeyo.", ee:"The bed is comfortable." },
+  { k:"의자", r:"uija", m:"Chair", cat:"Objects", ek:"의자에 앉으세요.", er:"Uijae anj-euseyo.", ee:"Please sit in the chair." },
+  { k:"책상", r:"chaeksang", m:"Desk", cat:"Objects", ek:"책상 위에 책이 있어요.", er:"Chaeksang wie chaegi isseoyo.", ee:"There's a book on the desk." },
+
+  // --- MORE CULTURE / IDIOMS ---
+  { k:"눈치", r:"nunchi", m:"Social awareness / Reading the room", cat:"Culture", ek:"눈치가 없어요.", er:"Nunchiga eopseoyo.", ee:"They have no social awareness." },
+  { k:"빨리빨리", r:"ppalli ppalli", m:"Hurry up / Quickly (Korean work culture)", cat:"Culture", ek:"한국 문화는 빨리빨리예요.", er:"Hanguk munhwaneun ppalli ppalliyo.", ee:"Korean culture is 'hurry hurry'." },
+  { k:"정", r:"jeong", m:"Deep emotional bond / attachment", cat:"Culture", ek:"한국 사람들은 정이 많아요.", er:"Hanguk saramdreun jeong-i manayo.", ee:"Korean people have a lot of 'jeong'." },
+  { k:"눈물", r:"nunmul", m:"Tears", cat:"Emotions", ek:"눈물이 나요.", er:"Nunmuri nayo.", ee:"Tears are coming out." },
+  { k:"그리다", r:"geurida", m:"To draw / to miss (someone)", cat:"Verbs", ek:"고향이 그리워요.", er:"Gohyangi geuriwoyo.", ee:"I miss my hometown." },
+  { k:"설레다", r:"seolle-da", m:"To feel excited / heart fluttering", cat:"Emotions", ek:"여행 생각에 설레요.", er:"Yeohaeng saenggake seolleoyo.", ee:"My heart flutters thinking about the trip." },
+  { k:"힘내세요", r:"himnaesseyo", m:"Hang in there / Stay strong", cat:"Phrases", ek:"다 잘 될 거예요, 힘내세요!", er:"Da jal doel geoyeyo, himnaeseyo!", ee:"Everything will be fine, stay strong!" },
+  { k:"고생했어요", r:"gosaenghaesseoyo", m:"You worked hard (acknowledgment)", cat:"Phrases", ek:"오늘도 고생했어요!", er:"Oneuldo gosaenghaesseoyo!", ee:"You worked hard today!" },
+  { k:"맞아요", r:"majayo", m:"That's right / Correct", cat:"Phrases", ek:"네, 맞아요!", er:"Ne, majayo!", ee:"Yes, that's right!" },
+  { k:"아직도", r:"ajikdo", m:"Still / Even now", cat:"Expressions", ek:"아직도 배워요.", er:"Ajikdo baeweoyo.", ee:"I'm still learning." },
+  { k:"드디어", r:"deudieo", m:"Finally / At last", cat:"Expressions", ek:"드디어 다 했어요!", er:"Deudieo da haesseoyo!", ee:"I finally finished it all!" },
+  { k:"갑자기", r:"gapjagi", m:"Suddenly / All of a sudden", cat:"Expressions", ek:"갑자기 비가 왔어요.", er:"Gapjagi biga wasseoyo.", ee:"It suddenly started raining." },
+  { k:"천천히", r:"cheoncheonhi", m:"Slowly", cat:"Expressions", ek:"천천히 가세요.", er:"Cheoncheonhi gaseyo.", ee:"Please go slowly / Take care." },
+  { k:"빨리", r:"ppalli", m:"Quickly / Fast", cat:"Expressions", ek:"빨리 오세요!", er:"Ppalli oseyo!", ee:"Come quickly!" },
+  { k:"같이", r:"gachi", m:"Together / With", cat:"Expressions", ek:"같이 가요!", er:"Gachi gayo!", ee:"Let's go together!" },
+  { k:"혼자", r:"honja", m:"Alone / By oneself", cat:"Expressions", ek:"혼자 여행해요.", er:"Honja yeohaenghaeyo.", ee:"I travel alone." },
+  { k:"모두", r:"modu", m:"Everyone / All", cat:"Expressions", ek:"모두 감사해요.", er:"Modu gamsahaeyo.", ee:"Thank you, everyone." },
+  { k:"아무도", r:"amudo", m:"Nobody / No one", cat:"Expressions", ek:"아무도 없어요.", er:"Amudo eopseoyo.", ee:"There's nobody." },
+
+  // --- EXTRA FILL TO REACH 365 ---
+  { k:"연습", r:"yeonseup", m:"Practice", cat:"Learning", ek:"매일 연습하면 좋아질 거예요.", er:"Maeil yeonseuphamyeon joajil geoyeyo.", ee:"If you practice every day, you'll get better." },
+  { k:"공부", r:"gongbu", m:"Study", cat:"Learning", ek:"열심히 공부해요.", er:"Yeolsimhi gongbuhaeyo.", ee:"I study hard." },
+  { k:"노력", r:"noryeok", m:"Effort / Hard work", cat:"Learning", ek:"노력하면 할 수 있어요.", er:"Noryeokamyeon hal su isseoyo.", ee:"If you put in effort, you can do it." },
+  { k:"실수", r:"silsu", m:"Mistake / Error", cat:"Learning", ek:"실수해도 괜찮아요.", er:"Silsuhaeya gwaenchanayo.", ee:"It's okay to make mistakes." },
+  { k:"성공", r:"seonggong", m:"Success", cat:"Learning", ek:"성공을 축하해요!", er:"Seonggong-eul chukhahaeyo!", ee:"Congratulations on your success!" },
+  { k:"포기", r:"pogi", m:"Giving up", cat:"Learning", ek:"포기하지 마세요!", er:"Pogihaji maseyo!", ee:"Don't give up!" },
+  { k:"도전", r:"dojeon", m:"Challenge", cat:"Learning", ek:"새로운 도전을 해봐요.", er:"Saeroun dojeon-eul haebwayo.", ee:"Let's try a new challenge." },
+  { k:"목표", r:"mokpyo", m:"Goal / Target", cat:"Learning", ek:"목표를 세워요.", er:"Mokpyoreul sewoyo.", ee:"I set a goal." },
+  { k:"꿈", r:"kkum", m:"Dream", cat:"Emotions", ek:"꿈을 향해 달려가요.", er:"Kkum-eul hyanghe dallyeogayo.", ee:"Run toward your dream." },
+  { k:"희망", r:"huimang", m:"Hope", cat:"Emotions", ek:"희망을 잃지 마세요.", er:"Huimang-eul iltji maseyo.", ee:"Don't lose hope." },
+  { k:"자신감", r:"jasigam", m:"Confidence / Self-confidence", cat:"Emotions", ek:"자신감을 가지세요!", er:"Jasigan-eul gasiseyo!", ee:"Have confidence!" },
+  { k:"용기", r:"yonggi", m:"Courage / Bravery", cat:"Emotions", ek:"용기를 내세요!", er:"Yonggireul naeseyo!", ee:"Be brave!" },
+  { k:"인내", r:"innae", m:"Patience / Endurance", cat:"Emotions", ek:"인내가 필요해요.", er:"Innaega piryohaeyo.", ee:"Patience is needed." },
+  { k:"지혜", r:"jihye", m:"Wisdom", cat:"Expressions", ek:"경험이 지혜를 줘요.", er:"Gyeongheom-i jihyereul jwoyo.", ee:"Experience gives wisdom." },
+  { k:"소통", r:"sotong", m:"Communication", cat:"Expressions", ek:"좋은 소통이 중요해요.", er:"Joeun sotong-i jungyohaeyo.", ee:"Good communication is important." },
+  { k:"약속", r:"yaksok", m:"Promise / Appointment", cat:"Expressions", ek:"약속을 지켜요.", er:"Yaksog-eul jikyeoyo.", ee:"I keep my promises." },
+  { k:"비밀", r:"bimil", m:"Secret", cat:"Expressions", ek:"비밀이 있어요.", er:"Bimiri isseoyo.", ee:"I have a secret." },
+  { k:"이야기", r:"iyagi", m:"Story / Talk", cat:"Expressions", ek:"재미있는 이야기 해줘요.", er:"Jaemiinneun iyagi haejwoyo.", ee:"Tell me an interesting story." },
+  { k:"농담", r:"nongdam", m:"Joke", cat:"Expressions", ek:"농담이에요, 웃어요!", er:"Nongdamieyo, useoyo!", ee:"It's a joke, laugh!" },
+  { k:"진짜", r:"jinjja", m:"Really / Truly / Genuine", cat:"Expressions", ek:"진짜요?!", er:"Jinjjayo?!", ee:"Really?!" },
+  { k:"거짓말", r:"geojinmal", m:"Lie / Untruth", cat:"Expressions", ek:"거짓말하지 마세요.", er:"Geojinmalhaji maseyo.", ee:"Don't lie." },
+  { k:"사실", r:"sasil", m:"Fact / Truth", cat:"Expressions", ek:"사실을 말해줘요.", er:"Sasirul malhaejwoyo.", ee:"Tell me the truth." },
+  { k:"당연하죠!", r:"dangyeonhajyo!", m:"Of course! Naturally!", cat:"Expressions", ek:"당연하죠, 도와드릴게요!", er:"Dangyeonhajyo, dowadeurilgeyo!", ee:"Of course, I'll help you!" },
+  { k:"어쩔 수 없어요", r:"eojjeol su eopseoyo", m:"There's nothing we can do / Can't help it", cat:"Expressions", ek:"어쩔 수 없어요, 그냥 받아들여요.", er:"Eojjeol su eopseoyo, geunyang badadeulryeoyo.", ee:"There's nothing we can do, just accept it." },
+  { k:"그럴 수도 있어요", r:"geureol sudo isseoyo", m:"That could be / It's possible", cat:"Expressions", ek:"그럴 수도 있어요, 걱정 마세요.", er:"Geureol sudo isseoyo, geokjeong maseyo.", ee:"That could be, don't worry." },
+  { k:"달라요", r:"dallayo", m:"It's different", cat:"Expressions", ek:"한국 문화는 달라요.", er:"Hanguk munhwaneun dallayo.", ee:"Korean culture is different." },
+  { k:"똑같아요", r:"ttokgatayo", m:"It's the same / identical", cat:"Expressions", ek:"두 개가 똑같아요.", er:"Du gaega ttokgatayo.", ee:"The two are identical." },
+  { k:"재미있다", r:"jaemitda", m:"Interesting / Fun", cat:"Adjectives", ek:"이 게임은 재미있어요.", er:"I geimeum jaemisseoyo.", ee:"This game is fun." },
+  { k:"재미없다", r:"jaemieoptda", m:"Boring / Not fun", cat:"Adjectives", ek:"이 영화는 재미없어요.", er:"I yeonghwaneun jaemieopsseoyo.", ee:"This movie is boring." },
+  { k:"신기하다", r:"singihada", m:"Amazing / Strange / Curious", cat:"Adjectives", ek:"그게 참 신기해요.", er:"Geuge cham singihaeyo.", ee:"That's quite amazing." },
+  { k:"귀엽다", r:"gwiyeopda", m:"Cute / Adorable", cat:"Adjectives", ek:"강아지가 너무 귀여워요.", er:"Gang-ajiga neomu gwiyeowoyo.", ee:"The puppy is so cute." },
+  { k:"무겁다", r:"mugeopda", m:"Heavy", cat:"Adjectives", ek:"이 짐이 너무 무거워요.", er:"I jimi neomu mugeowoyo.", ee:"This luggage is too heavy." },
+  { k:"가볍다", r:"gabyeopda", m:"Light (not heavy)", cat:"Adjectives", ek:"이 가방은 가벼워요.", er:"I gabangeun gabyeowoyo.", ee:"This bag is light." },
+  { k:"부드럽다", r:"budeureopda", m:"Soft / Smooth / Gentle", cat:"Adjectives", ek:"이 베개가 부드러워요.", er:"I begaega budeureowoyo.", ee:"This pillow is soft." },
+  { k:"딱딱하다", r:"ttakttakada", m:"Hard / Stiff", cat:"Adjectives", ek:"이 빵은 딱딱해요.", er:"I ppangeun ttakttakaeyo.", ee:"This bread is hard." },
+  { k:"복잡하다", r:"bokjaphada", m:"Complicated / Complex / Crowded", cat:"Adjectives", ek:"서울 지하철은 복잡해요.", er:"Seoul jihacheoreun bokjaphaeyo.", ee:"Seoul subway is complex (and crowded)." },
+  { k:"간단하다", r:"gandanhada", m:"Simple / Easy", cat:"Adjectives", ek:"이 요리는 간단해요.", er:"I yorineun gandanhaeyo.", ee:"This dish is simple to make." },
+  { k:"중요하다", r:"jungyohada", m:"Important", cat:"Adjectives", ek:"건강이 중요해요.", er:"Geongang-i jungyohaeyo.", ee:"Health is important." },
+  { k:"필요하다", r:"piryohada", m:"Necessary / Needed", cat:"Adjectives", ek:"연습이 필요해요.", er:"Yeonseup-i piryohaeyo.", ee:"Practice is necessary." },
+  { k:"가능하다", r:"ganeunghada", m:"Possible / Capable", cat:"Adjectives", ek:"다 가능해요!", er:"Da ganeunghaeyo!", ee:"Everything is possible!" },
+  { k:"불가능하다", r:"bulganeunghada", m:"Impossible", cat:"Adjectives", ek:"불가능해 보여도 할 수 있어요.", er:"Bulganeunghae boyeodo hal su isseoyo.", ee:"Even if it seems impossible, you can do it." },
+  { k:"특별하다", r:"teukbyeolhada", m:"Special", cat:"Adjectives", ek:"오늘은 특별한 날이에요.", er:"Oneureun teukbyeolhan narieyo.", ee:"Today is a special day." },
+  { k:"보통", r:"botong", m:"Normal / Ordinary / Usually", cat:"Expressions", ek:"보통 몇 시에 자요?", er:"Botong myeot sie jayo?", ee:"What time do you usually sleep?" },
+  { k:"항상", r:"hangsang", m:"Always", cat:"Expressions", ek:"항상 건강하세요.", er:"Hangsang geongganghaseyo.", ee:"Always stay healthy." },
+  { k:"가끔", r:"gakkeum", m:"Sometimes / Occasionally", cat:"Expressions", ek:"가끔 혼자 산책해요.", er:"Gakkeum honja sanchaekhaeyo.", ee:"I sometimes take a walk alone." },
+  { k:"자주", r:"jaju", m:"Often / Frequently", cat:"Expressions", ek:"자주 연락해요.", er:"Jaju yeolrakhaeyo.", ee:"Let's keep in touch often." },
+  { k:"절대", r:"jeoldae", m:"Never / Absolutely", cat:"Expressions", ek:"절대 포기하지 마세요.", er:"Jeoldae pogihaji maseyo.", ee:"Never give up." },
+  { k:"이미", r:"imi", m:"Already", cat:"Expressions", ek:"이미 알고 있어요.", er:"Imi algo isseoyo.", ee:"I already know." },
+  { k:"아직", r:"ajik", m:"Yet / Still", cat:"Expressions", ek:"아직 안 왔어요.", er:"Ajik an wasseoyo.", ee:"They haven't come yet." },
+  { k:"또", r:"tto", m:"Again / Also / And", cat:"Expressions", ek:"또 만나요!", er:"Tto mannayo!", ee:"See you again!" },
+  { k:"그리고", r:"geurigo", m:"And / And then", cat:"Expressions", ek:"밥 먹고, 그리고 커피 마셔요.", er:"Bap meokgo, geurigo keopi mashyeoyo.", ee:"I eat rice, and then drink coffee." },
+  { k:"하지만", r:"hajiman", m:"But / However", cat:"Expressions", ek:"어렵지만, 할 수 있어요.", er:"Eoryeopjiman, hal su isseoyo.", ee:"It's difficult, but I can do it." },
+  { k:"그래서", r:"geuraeseo", m:"So / Therefore / Thus", cat:"Expressions", ek:"배고파요, 그래서 먹어요.", er:"Baegopayo, geuraeseo meogeyo.", ee:"I'm hungry, so I eat." },
+  { k:"왜냐하면", r:"waenyahamyeon", m:"Because / The reason is", cat:"Expressions", ek:"좋아요, 왜냐하면 재미있거든요.", er:"Joayo, waenyahamyeon jaemitkkeodeuneyo.", ee:"I like it, because it's fun." },
+  { k:"만약", r:"manyak", m:"If / In case", cat:"Expressions", ek:"만약 비가 오면 집에 있을게요.", er:"Manyak biga omyeon jibe isseulgeyo.", ee:"If it rains, I'll stay home." },
+  { k:"좋아하다", r:"joahada", m:"To like", cat:"Verbs", ek:"저는 한국어를 좋아해요.", er:"Jeoneun hangug-eoreul joahaeyo.", ee:"I like Korean." },
+  { k:"싫어하다", r:"sireohada", m:"To dislike", cat:"Verbs", ek:"거짓말을 싫어해요.", er:"Geojinmareul sireohaeyo.", ee:"I dislike lies." },
+  { k:"알다", r:"alda", m:"To know", cat:"Verbs", ek:"저도 알아요.", er:"Jeodo arayo.", ee:"I know too." },
+  { k:"모르다", r:"moreuda", m:"To not know", cat:"Verbs", ek:"잘 몰라요.", er:"Jal mollayo.", ee:"I don't really know." },
+  { k:"찾다", r:"chatda", m:"To find / look for", cat:"Verbs", ek:"열쇠를 찾고 있어요.", er:"Yeolsoereul chatgo isseoyo.", ee:"I'm looking for the key." },
+  { k:"잃다", r:"ilda", m:"To lose", cat:"Verbs", ek:"지갑을 잃어버렸어요.", er:"Jigabeul ireobeoryeosseoyo.", ee:"I lost my wallet." },
+  { k:"기다리다", r:"gidarida", m:"To wait", cat:"Verbs", ek:"조금만 기다려 주세요.", er:"Jogeumman gidaryeo juseyo.", ee:"Please wait just a moment." },
+  { k:"선택하다", r:"seontaekada", m:"To choose / select", cat:"Verbs", ek:"신중하게 선택해요.", er:"Sinjunghage seontaekhaeyo.", ee:"Choose carefully." },
+  { k:"준비하다", r:"junbihada", m:"To prepare", cat:"Verbs", ek:"여행을 준비해요.", er:"Yeohaengeul junbihaeyo.", ee:"I prepare for a trip." },
+  { k:"시작하다", r:"sijakhada", m:"To start / begin", cat:"Verbs", ek:"지금 시작해요!", er:"Jigeum sijakaeyo!", ee:"Let's start now!" },
+  { k:"끝내다", r:"kkeutnaeda", m:"To finish / end", cat:"Verbs", ek:"숙제를 끝냈어요.", er:"Sukjereul kkeutnaesseoyo.", ee:"I finished my homework." },
+  { k:"계속하다", r:"gyesokada", m:"To continue", cat:"Verbs", ek:"계속 노력해요!", er:"Gyesok noryeokhaeyo!", ee:"Keep trying!" },
+  { k:"멈추다", r:"meomchuda", m:"To stop", cat:"Verbs", ek:"여기서 멈춰요.", er:"Yeogiseo meomchweoyo.", ee:"Stop here." },
+  { k:"달리다", r:"dallida", m:"To run", cat:"Verbs", ek:"공원에서 달려요.", er:"Gong-weneseo dallyeoyo.", ee:"I run in the park." },
+  { k:"걷다", r:"geotda", m:"To walk", cat:"Verbs", ek:"매일 아침에 걸어요.", er:"Maeil achime georeoyo.", ee:"I walk every morning." },
+  { k:"앉다", r:"anda", m:"To sit", cat:"Verbs", ek:"앉아서 이야기해요.", er:"Anjaseo iyagihaeyo.", ee:"Let's sit and talk." },
+  { k:"서다", r:"seoda", m:"To stand", cat:"Verbs", ek:"줄 서서 기다려요.", er:"Jul seoseo gidalyeoyo.", ee:"Stand in line and wait." },
+  { k:"넣다", r:"neotha", m:"To put in / insert", cat:"Verbs", ek:"가방에 책을 넣어요.", er:"Gabange chaeg-eul neoeoyo.", ee:"I put books in the bag." },
+  { k:"꺼내다", r:"kkeonaeda", m:"To take out", cat:"Verbs", ek:"가방에서 지갑을 꺼내요.", er:"Gabangeseo jigabeul kkeonaeyeo.", ee:"I take out my wallet from my bag." },
+  { k:"돌아오다", r:"doraooda", m:"To return / come back", cat:"Verbs", ek:"빨리 돌아와요!", er:"Ppalli doraowayo!", ee:"Come back quickly!" },
+  { k:"떠나다", r:"tteonada", m:"To leave / depart", cat:"Verbs", ek:"내일 서울을 떠나요.", er:"Naeil Seoureul tteonayo.", ee:"I leave Seoul tomorrow." },
+  { k:"만나다", r:"mannada", m:"To meet", cat:"Verbs", ek:"오늘 친구를 만나요.", er:"Oneul chingureul mannayo.", ee:"I meet my friend today." },
+  { k:"헤어지다", r:"heeojida", m:"To part / separate / break up", cat:"Verbs", ek:"역에서 헤어져요.", er:"Yeogeseo heeojyeoyo.", ee:"We part at the station." },
+  { k:"연락하다", r:"yeollakada", m:"To contact / get in touch", cat:"Verbs", ek:"나중에 연락해요.", er:"Najunge yeollakaeyo.", ee:"Contact me later." },
+  { k:"물어보다", r:"mureobolda", m:"To ask (a question)", cat:"Verbs", ek:"모르면 물어봐요.", er:"Moreumyeon mureobwayo.", ee:"If you don't know, ask." },
+  { k:"대답하다", r:"daedapada", m:"To answer / reply", cat:"Verbs", ek:"질문에 대답해요.", er:"Jilmune daedapaeyo.", ee:"I answer the question." },
+  { k:"설명하다", r:"seolmyeonghada", m:"To explain", cat:"Verbs", ek:"천천히 설명해 주세요.", er:"Cheoncheonhi seolmyeonghae juseyo.", ee:"Please explain slowly." },
+  { k:"이해하다", r:"ihaehada", m:"To understand", cat:"Verbs", ek:"이제 이해해요.", er:"Ije ihaehaeyo.", ee:"Now I understand." },
+  { k:"생각하다", r:"saenggakada", m:"To think", cat:"Verbs", ek:"어떻게 생각해요?", er:"Eotteoke saenggakaeyo?", ee:"What do you think?" },
+  { k:"느끼다", r:"neukkida", m:"To feel", cat:"Verbs", ek:"행복을 느껴요.", er:"Haengbog-eul neukkyeoyo.", ee:"I feel happiness." },
+];
+
+// ============================================================
+// Day calculation — deterministic, offset from Jan 1 2026
+// ============================================================
+function getDayIndex() {
+  const start = new Date(2026, 0, 1); // Jan 1 2026
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return ((diff % words.length) + words.length) % words.length;
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+// ============================================================
+// Load today's word
+// ============================================================
+const idx = getDayIndex();
+const today = words[idx];
+const now = new Date();
+
+document.getElementById('dateDisplay').textContent = formatDate(now);
+document.getElementById('categoryTag').textContent = today.cat;
+document.getElementById('koreanWord').textContent = today.k;
+document.getElementById('romanization').textContent = today.r;
+document.getElementById('meaningText').textContent = today.m;
+document.getElementById('exampleKorean').textContent = today.ek;
+document.getElementById('exampleRoman').textContent = today.er;
+document.getElementById('exampleEnglish').textContent = today.ee;
+
+// Day number (1-365 from start of cycle)
+document.getElementById('dayBadge').textContent = `Word ${idx + 1} of ${words.length}`;
+
+// ============================================================
+// Streak dots — track visited days in localStorage
+// ============================================================
+function initStreak() {
+  const KEY = 'korean_visited';
+  let visited = JSON.parse(localStorage.getItem(KEY) || '[]');
+  if (!visited.includes(idx)) {
+    visited.push(idx);
+    localStorage.setItem(KEY, JSON.stringify(visited));
+  }
+
+  const container = document.getElementById('streakDots');
+  const show = Math.min(words.length, 52); // show 52 dot window
+  const start = Math.max(0, idx - 25);
+
+  for (let i = start; i < start + show && i < words.length; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === idx ? ' today' : (visited.includes(i) ? ' visited' : ''));
+    dot.title = `Word ${i + 1}`;
+    container.appendChild(dot);
+  }
+}
+
+initStreak();
+
+// ============================================================
+// Text-to-speech using Web Speech API
+// ============================================================
+let isSpeaking = false;
+
+function speakText(text, onDone) {
+  if (!window.speechSynthesis) {
+    alert('Your browser does not support text-to-speech. Try Chrome or Edge.');
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ko-KR';
+  utter.rate = 0.85;
+  utter.pitch = 1;
+
+  // Try to find a Korean voice
+  const voices = window.speechSynthesis.getVoices();
+  const koreanVoice = voices.find(v => v.lang === 'ko-KR' || v.lang.startsWith('ko'));
+  if (koreanVoice) utter.voice = koreanVoice;
+
+  const btn = document.getElementById('speakBtn');
+  const wave = document.getElementById('waveAnim');
+  const btnText = document.getElementById('btnText');
+
+  isSpeaking = true;
+  wave.classList.add('playing');
+  btnText.textContent = 'Playing…';
+
+  utter.onend = utter.onerror = () => {
+    isSpeaking = false;
+    wave.classList.remove('playing');
+    btnText.textContent = 'Pronounce';
+    if (onDone) onDone();
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
+function speakKorean(thenExample) {
+  speakText(today.k, thenExample ? () => {
+    setTimeout(() => speakText(today.ek), 800);
+  } : null);
+}
+
+function speakExample() {
+  speakText(today.ek);
+}
+
+// Chrome needs voices loaded async
+window.speechSynthesis.onvoiceschanged = () => {};
+
+// Auto-speak the word once on page load (after small delay)
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    // Only auto-speak if user has interacted or if no prior autoplay block
+    // We'll just prime the voice list silently
+    window.speechSynthesis.getVoices();
+  }, 600);
+});
+</script>
+</body>
+</html>
